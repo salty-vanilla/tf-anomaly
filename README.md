@@ -15,3 +15,4 @@ I use eager execution !!
 * Complementary GAN
 * AVID
 * Deep Anomaly Detection Using Geometric Transformations
+* Efficient-GAN-Based Anomaly Detection
