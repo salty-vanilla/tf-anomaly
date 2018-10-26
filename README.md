@@ -8,11 +8,11 @@ Major anomaly detection methods using neural networks are implemented in this re
 I use eager execution !!
 
 ## Implemented
+* Complementary GAN
 
 ## To Implement
 * AnoGAN
 * DAGMM
-* Complementary GAN
 * AVID
 * Deep Anomaly Detection Using Geometric Transformations
 * Efficient-GAN-Based Anomaly Detection
