@@ -8,7 +8,7 @@ Major anomaly detection methods using neural networks are implemented in this re
 I use eager execution !!
 
 ## Implemented
-* Complementary GAN
+* [Complementary GAN](https://github.com/salty-vanilla/tf-anomaly/tree/master/impl/complementary_gan)
 
 ## To Implement
 * AnoGAN
