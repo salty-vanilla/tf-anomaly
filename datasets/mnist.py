@@ -14,6 +14,9 @@ def load_data(phase='train',
     x = x_train if phase == 'train' else x_test
     y = y_train if phase == 'train' else y_test
 
+    if target_size is not None or target_size != (28, 28):
+        x = np.array([imresize(arr, target_size) for arr in x])
+
     if normalization is not None:
         x = x.astype('float32')
         if normalization == 'sigmoid':
@@ -22,9 +25,6 @@ def load_data(phase='train',
             x = (x/255 - 0.5) * 2
         else:
             raise ValueError
-
-    if target_size is not None or target_size != (28, 28):
-        x = np.array([imresize(arr, target_size) for arr in x])
 
     x = np.expand_dims(x, -1)
 

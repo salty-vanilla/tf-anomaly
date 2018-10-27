@@ -11,24 +11,25 @@ from sklearn.metrics import auc
 import seaborn as sns
 
 
-def compute_fpr_tpr(path,
-                    metric,
-                    interval=100):
+# plt.style.use('seaborn-whitegrid')
+# plt.style.use('grayscale')
+# plt.style.use('seaborn-colorblind')
+# plt.style.use('seaborn-dark-palette')
+
+
+def compute_fpr_tpr(path, interval=100):
     df = pd.read_csv(path)
-    df = df[['label', metric]]
+    df = df[['label', 'energy']]
 
     fpr_list = []
     tpr_list = []
 
-    max_ = max(df[metric])
-    step = max_ / interval
-    for thr in np.arange(0.0, max_ + 1., step):
-        if metric == 'normality':
-            tp = len(df[(df.label == 'outlier') & (df[metric] < thr)])
-            fp = len(df[(df.label == 'inlier') & (df[metric] < thr)])
-        else:
-            tp = len(df[(df.label == 'outlier') & (df[metric] > thr)])
-            fp = len(df[(df.label == 'inlier') & (df[metric] > thr)])
+    max_ = max(df['energy'])
+    min_ = min(df['energy'])
+    step = (max_-min_) / interval
+    for thr in np.arange(min_, max_, step):
+        tp = len(df[(df.label == 'outlier') & (df.energy > thr)])
+        fp = len(df[(df.label == 'inlier') & (df.energy > thr)])
 
         fpr = fp / len(df[df.label == 'inlier'])
         tpr = tp / len(df[df.label == 'outlier'])
@@ -45,7 +46,6 @@ def draw_roc_curves(dst_path,
                     names,
                     linestyles,
                     display_auc):
-    names = ['' for _ in range(len(fprs))] if names is None else names
     plt.grid()
     for (fpr, tpr, auc_, name, ls) in zip(fprs, tprs, aucs, names, linestyles):
         plt.xlim(0., 1.0)
@@ -57,6 +57,9 @@ def draw_roc_curves(dst_path,
             name += "_{:.4f}".format(auc_)
         plt.plot(fpr, tpr, label=name, lw=3, linestyle=ls)
 
+    # leg = plt.legend(bbox_to_anchor=(0.5, 1.1), loc='upper center',
+    #                  borderaxespad=0., ncol=3, fontsize='x-large',
+    #                  frameon=True)
     leg = plt.legend(loc='lower right',
                      fontsize='large',
                      frameon=True)
@@ -69,7 +72,6 @@ def draw_roc_curves(dst_path,
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('csv_paths', nargs='+', type=str)
-    parser.add_argument('--metric', '-m', type=str)
     parser.add_argument('--labels', nargs='+', type=str, default=None)
     parser.add_argument('--interval', type=int, default=1000)
     parser.add_argument('--dst_path', type=str, default='./roc.png')
@@ -88,9 +90,7 @@ def main():
     if args.linestyles is None:
         args.linestyles = ['solid']*len(args.csv_paths)
     for csv_path in args.csv_paths:
-        fpr, tpr = compute_fpr_tpr(csv_path,
-                                   args.metric,
-                                   args.interval)
+        fpr, tpr = compute_fpr_tpr(csv_path, args.interval)
         auc_ = auc(fpr, tpr)
         fprs.append(fpr)
         tprs.append(tpr)

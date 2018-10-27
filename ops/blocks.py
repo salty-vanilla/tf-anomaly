@@ -63,3 +63,36 @@ class ConvBlock(tf.keras.Model):
             x = self.norm(x, training=training)
         x = activation(x, self.act)
         return x
+
+
+class DenseBlock(tf.keras.Model):
+    def __init__(self, units,
+                 activation_=None,
+                 normalization=None,
+                 **dense_params):
+        super().__init__()
+        self.dense = tf.keras.layers.Dense(units,
+                                           activation=None,
+                                           **dense_params)
+
+        # Normalization
+        if normalization is not None:
+            if normalization == 'batch':
+                self.norm = tf.keras.layers.BatchNormalization()
+            elif normalization == 'layer':
+                raise NotImplementedError
+            else:
+                raise ValueError
+        else:
+            self.norm = None
+
+        self.act = activation_
+
+    def call(self, inputs,
+             training=None,
+             mask=None):
+        x = self.dense(inputs)
+        if self.norm is not None:
+            x = self.norm(x, training=training)
+        x = activation(x, self.act)
+        return x

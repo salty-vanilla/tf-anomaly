@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 
 
-class AutoEncoder(tf.keras.Model):
+class BaseAutoEncoder(tf.keras.Model):
     def __init__(self, latent_dim,
                  nb_filter=16,
                  last_activation='tanh',
@@ -29,7 +29,7 @@ class AutoEncoder(tf.keras.Model):
     def call(self, inputs,
              training=None,
              mask=None):
-        return self.decoder(self.encoder(inputs, training), training)
+        return self.decode(self.encode(inputs, training), training)
 
     def encode(self, inputs,
                training=None,
