@@ -19,7 +19,9 @@ def main():
     outlier_classes = [i for i in range(10) if i not in inlier_classes]
 
     x, y = load_data('test',
-                     **config['test_data_params'])
+                     **config['test_data_params'],
+                     with_label=True,
+                     normalization='tanh')
     y = np.array(y)
 
     discriminator = Discriminator(**config['discriminator_params'])
