@@ -13,13 +13,14 @@ class EstimationNetwork(tf.keras.Model):
                                   activation_=None,
                                   normalization=normalization)
                        for d in dense_units[:len(dense_units)-1]]
-        self.denses += [tf.keras.layers.Dense(dense_units[-1],
-                                              activation='softmax')]
+        self.denses += [DenseBlock(dense_units[-1],
+                                   activation_='softmax',
+                                   normalization=None)]
 
     def call(self, inputs,
              training=None,
              mask=None):
         x = inputs
         for dense in self.denses:
-            x = dense(x)
+            x = dense(x, training=training)
         return x
