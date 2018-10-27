@@ -6,8 +6,6 @@ train_data_params:
     - 0
   with_label: False
 
-test_data_params:
-
 generator_params:
   latent_dim: 100
   nb_filter: 32

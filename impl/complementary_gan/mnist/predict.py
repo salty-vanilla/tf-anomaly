@@ -5,6 +5,7 @@ import yaml
 import numpy as np
 import pandas as pd
 sys.path.append(os.getcwd())
+sys.path.append('../../')
 tf.enable_eager_execution()
 from mnist.discriminator import Discriminator
 from datasets.mnist import load_data
@@ -19,7 +20,6 @@ def main():
     outlier_classes = [i for i in range(10) if i not in inlier_classes]
 
     x, y = load_data('test',
-                     **config['test_data_params'],
                      with_label=True,
                      normalization='tanh')
     y = np.array(y)
