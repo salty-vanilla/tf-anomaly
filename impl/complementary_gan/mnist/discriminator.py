@@ -2,7 +2,7 @@ import tensorflow as tf
 import os
 import sys
 sys.path.append(os.getcwd())
-from models import Generator as D
+from models import Discriminator as D
 from ops.blocks import ConvBlock
 
 
