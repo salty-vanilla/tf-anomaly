@@ -32,36 +32,29 @@ def discriminator_loss(d_real,
 
 def gradient_penalty(discriminator,
                      real,
-                     fake,
-                     batch_size=None):
-    with tf.variable_scope('GradientPenalty'):
-        if batch_size is not None:
-            if not isinstance(batch_size, int):
-                raise ValueError
-            else:
-                bs = batch_size
-        else:
-            bs = tf.placeholder(tf.int32, shape=[])
-
+                     fake):
+    with tf.GradientTape() as g:
+        bs = real.get_shape().as_list()[0]
         if len(real.get_shape().as_list()) == 4:
-            epsilon = tf.random_uniform(shape=[bs, 1, 1, 1],
-                                        minval=0., maxval=1.)
+            eps = tf.random_uniform(shape=[bs, 1, 1, 1],
+                                    minval=0., maxval=1.)
         elif len(real.get_shape().as_list()) == 2:
-            epsilon = tf.random_uniform(shape=[bs, 1],
-                                        minval=0., maxval=1.)
+            eps = tf.random_uniform(shape=[bs, 1],
+                                    minval=0., maxval=1.)
         else:
             raise ValueError
 
         differences = fake - real
-        interpolates = real + (epsilon * differences)
-        gradients = tf.gradients(discriminator(interpolates, reuse=True),
-                                 [interpolates])[0]
-        slopes = tf.sqrt(tf.reduce_sum(tf.square(gradients), reduction_indices=[1]))
-        gp = tf.reduce_mean(tf.square(slopes - 1.))
-        if batch_size is not None:
-            return gp
-        else:
-            return gp, bs
+        interpolates = real + (eps * differences)
+
+        g.watch(interpolates)
+        y = discriminator(interpolates,
+                          training=True)
+    grads = g.gradient(y, interpolates)
+    slopes = tf.sqrt(tf.reduce_sum(tf.square(grads),
+                                   reduction_indices=[1]))
+    gp = tf.reduce_mean(tf.square(slopes - 1.))
+    return gp
 
 
 def discriminator_norm(d_real):
