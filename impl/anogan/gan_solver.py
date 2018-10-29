@@ -13,14 +13,12 @@ from ops.losses import discriminator_loss, generator_loss, gradient_penalty, dis
 class GANSolver(object):
     def __init__(self, generator,
                  discriminator,
-                 lambda_: float=10.,
                  d_norm_eps: float=1e-3,
                  lr_g: float=1e-4,
                  lr_d: float=1e-4,
                  logdir: str = None):
         self.generator = generator
         self.discriminator = discriminator
-        self.lambda_ = lambda_
         self.d_norm_eps = d_norm_eps
         self.opt_g = tf.train.AdamOptimizer(lr_g, beta1=0.5, beta2=0.9)
         self.opt_d = tf.train.AdamOptimizer(lr_d, beta1=0.5, beta2=0.9)
@@ -30,20 +28,30 @@ class GANSolver(object):
     def _update_discriminator(self, x, z):
         gz = self.generator(z, training=True)
 
-        gp = gradient_penalty(self.discriminator,
-                              real=x,
-                              fake=gz)
-
         with tf.GradientTape() as tape:
             d_real = self.discriminator(x, training=True)
             d_fake = self.discriminator(gz, training=True)
             loss_d = discriminator_loss(d_real, d_fake, 'WD')
             d_norm = discriminator_norm(d_real)
-            loss = loss_d + self.lambda_*gp + self.d_norm_eps*d_norm
+            loss = loss_d + self.d_norm_eps*d_norm
 
         grads = tape.gradient(loss, self.discriminator.variables)
+
+        # TODO: Gradient Penalty
+        # Gradient Penalty cannot run on TF 1.11
+        # with tf.GradientTape() as tape:
+        #     gp = gradient_penalty(self.discriminator,
+        #                           real=x,
+        #                           fake=gz)
+        #
+        # grads_gp = tape.gradient(gp, self.discriminator.variables)
+        #
         self.opt_d.apply_gradients(zip(grads, self.discriminator.variables))
-        return loss_d, gp, d_norm
+
+        for v in self.discriminator.variables:
+            tf.clip_by_value(v, -0.01, 0.01)
+
+        return loss_d, d_norm
 
     def _update_generator(self, z):
         with tf.GradientTape() as tape:
@@ -94,16 +102,16 @@ class GANSolver(object):
                 # Discriminator
                 x = tf.constant(x, dtype=tf.float32)
                 z = tf.constant(z, dtype=tf.float32)
-                loss_d, gp, d_norm = self._update_discriminator(x, z)
+                loss_d, d_norm = self._update_discriminator(x, z)
 
                 # Generator
                 z = noise_sampler(batch_size, self.latent_dim)
                 z = tf.constant(z, dtype=tf.float32)
                 loss_g = self._update_generator(z)
 
-                print('iter : {} / {}  {:.1f}[s]  loss_d : {:.4f}  gp : {:.4f}  loss_g : {:.4f}\r'
+                print('iter : {} / {}  {:.1f}[s]  loss_d : {:.4f}  loss_g : {:.4f}\r'
                       .format(iter_, steps_per_epoch, time.time() - start,
-                              loss_d, gp, loss_g), end='')
+                              loss_d, loss_g), end='')
 
             if epoch % visualize_steps == 0:
                 self._visualize(z, epoch, image_sampler.data_to_image)
