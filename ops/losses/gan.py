@@ -38,9 +38,11 @@ def gradient_penalty(discriminator,
         if len(real.get_shape().as_list()) == 4:
             eps = tf.random_uniform(shape=[bs, 1, 1, 1],
                                     minval=0., maxval=1.)
+            reduction_indices = [1, 2, 3]
         elif len(real.get_shape().as_list()) == 2:
             eps = tf.random_uniform(shape=[bs, 1],
                                     minval=0., maxval=1.)
+            reduction_indices = [1]
         else:
             raise ValueError
 
@@ -52,7 +54,7 @@ def gradient_penalty(discriminator,
                           training=True)
     grads = g.gradient(y, interpolates)
     slopes = tf.sqrt(tf.reduce_sum(tf.square(grads),
-                                   reduction_indices=[1]))
+                                   reduction_indices=reduction_indices))
     gp = tf.reduce_mean(tf.square(slopes - 1.))
     return gp
 
