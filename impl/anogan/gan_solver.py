@@ -13,12 +13,14 @@ from ops.losses import discriminator_loss, generator_loss, gradient_penalty, dis
 class GANSolver(object):
     def __init__(self, generator,
                  discriminator,
+                 gp_lambda: float=10.,
                  d_norm_eps: float=1e-3,
                  lr_g: float=1e-4,
                  lr_d: float=1e-4,
                  logdir: str = None):
         self.generator = generator
         self.discriminator = discriminator
+        self.gp_lambda = gp_lambda
         self.d_norm_eps = d_norm_eps
         self.opt_g = tf.train.AdamOptimizer(lr_g, beta1=0.5, beta2=0.9)
         self.opt_d = tf.train.AdamOptimizer(lr_d, beta1=0.5, beta2=0.9)
@@ -28,6 +30,32 @@ class GANSolver(object):
     def _update_discriminator(self, x, z):
         gz = self.generator(z, training=True)
 
+        bs = x.get_shape().as_list()[0]
+        if len(x.get_shape().as_list()) == 4:
+            eps = tf.random_uniform(shape=[bs, 1, 1, 1],
+                                    minval=0., maxval=1.)
+            reduction_indices = [1, 2, 3]
+        elif len(x.get_shape().as_list()) == 2:
+            eps = tf.random_uniform(shape=[bs, 1],
+                                    minval=0., maxval=1.)
+            reduction_indices = [1]
+        else:
+            raise ValueError
+
+        differences = gz - x
+        interpolates = x + (eps * differences)
+
+        with tf.GradientTape(persistent=True) as g:
+            g.watch(interpolates)
+            y = self.discriminator(interpolates,
+                                   training=True)
+            grads = g.gradient(y, interpolates)
+            slopes = tf.sqrt(tf.reduce_sum(tf.square(grads),
+                                           reduction_indices=reduction_indices))
+            gp = self.gp_lambda * tf.reduce_mean(tf.square(slopes - 1.))
+        grads_gp = g.gradient(gp, self.discriminator.variables)
+        del g
+
         with tf.GradientTape() as tape:
             d_real = self.discriminator(x, training=True)
             d_fake = self.discriminator(gz, training=True)
@@ -36,21 +64,9 @@ class GANSolver(object):
             loss = loss_d + self.d_norm_eps*d_norm
 
         grads = tape.gradient(loss, self.discriminator.variables)
-
-        # TODO: Gradient Penalty
-        # Gradient Penalty cannot run on TF 1.11
-        # with tf.GradientTape() as tape:
-        #     gp = gradient_penalty(self.discriminator,
-        #                           real=x,
-        #                           fake=gz)
-        #
-        # grads_gp = tape.gradient(gp, self.discriminator.variables)
-        #
+        grads = [g + ggp for g, ggp in zip(grads, grads_gp)
+                 if ggp is not None]
         self.opt_d.apply_gradients(zip(grads, self.discriminator.variables))
-
-        for v in self.discriminator.variables:
-            tf.clip_by_value(v, -0.01, 0.01)
-
         return loss_d, d_norm
 
     def _update_generator(self, z):

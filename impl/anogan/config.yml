@@ -1,4 +1,4 @@
-logdir: ../../../logs/anogan/mnist/debug4
+logdir: ../../../logs/anogan/mnist/debug6
 test_epoch: 100
 
 train_data_params:
@@ -14,7 +14,7 @@ generator_params:
 
 discriminator_params:
   nb_filter: 16
-  normalization: batch
+  normalization:
   downsampling: stride
 
 solver_params:
