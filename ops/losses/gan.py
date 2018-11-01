@@ -33,22 +33,22 @@ def discriminator_loss(d_real,
 def gradient_penalty(discriminator,
                      real,
                      fake):
+    bs = real.get_shape().as_list()[0]
+    if len(real.get_shape().as_list()) == 4:
+        eps = tf.random_uniform(shape=[bs, 1, 1, 1],
+                                minval=0., maxval=1.)
+        reduction_indices = [1, 2, 3]
+    elif len(real.get_shape().as_list()) == 2:
+        eps = tf.random_uniform(shape=[bs, 1],
+                                minval=0., maxval=1.)
+        reduction_indices = [1]
+    else:
+        raise ValueError
+
+    differences = fake - real
+    interpolates = real + (eps * differences)
+
     with tf.GradientTape() as g:
-        bs = real.get_shape().as_list()[0]
-        if len(real.get_shape().as_list()) == 4:
-            eps = tf.random_uniform(shape=[bs, 1, 1, 1],
-                                    minval=0., maxval=1.)
-            reduction_indices = [1, 2, 3]
-        elif len(real.get_shape().as_list()) == 2:
-            eps = tf.random_uniform(shape=[bs, 1],
-                                    minval=0., maxval=1.)
-            reduction_indices = [1]
-        else:
-            raise ValueError
-
-        differences = fake - real
-        interpolates = real + (eps * differences)
-
         g.watch(interpolates)
         y = discriminator(interpolates,
                           training=True)

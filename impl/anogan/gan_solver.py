@@ -29,32 +29,12 @@ class GANSolver(object):
 
     def _update_discriminator(self, x, z):
         gz = self.generator(z, training=True)
-
-        bs = x.get_shape().as_list()[0]
-        if len(x.get_shape().as_list()) == 4:
-            eps = tf.random_uniform(shape=[bs, 1, 1, 1],
-                                    minval=0., maxval=1.)
-            reduction_indices = [1, 2, 3]
-        elif len(x.get_shape().as_list()) == 2:
-            eps = tf.random_uniform(shape=[bs, 1],
-                                    minval=0., maxval=1.)
-            reduction_indices = [1]
-        else:
-            raise ValueError
-
-        differences = gz - x
-        interpolates = x + (eps * differences)
-
-        with tf.GradientTape(persistent=True) as g:
-            g.watch(interpolates)
-            y = self.discriminator(interpolates,
-                                   training=True)
-            grads = g.gradient(y, interpolates)
-            slopes = tf.sqrt(tf.reduce_sum(tf.square(grads),
-                                           reduction_indices=reduction_indices))
-            gp = self.gp_lambda * tf.reduce_mean(tf.square(slopes - 1.))
-        grads_gp = g.gradient(gp, self.discriminator.variables)
-        del g
+        with tf.GradientTape() as tape:
+            gp = gradient_penalty(self.discriminator,
+                                  real=x,
+                                  fake=gz)
+            gp *= self.gp_lambda
+        grads_gp = tape.gradient(gp, self.discriminator.variables)
 
         with tf.GradientTape() as tape:
             d_real = self.discriminator(x, training=True)
