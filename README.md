@@ -11,8 +11,10 @@ I use eager execution !!
 * [Complementary GAN](https://github.com/salty-vanilla/tf-anomaly/tree/master/impl/complementary_gan)
 * [DAGMM](https://github.com/salty-vanilla/tf-anomaly/tree/master/impl/dagmm)
 
+## WIP
+* [AnoGAN](https://github.com/salty-vanilla/tf-anomaly/tree/master/impl/anogan)
+
 ## To Implement
-* AnoGAN
 * AVID
 * Deep Anomaly Detection Using Geometric Transformations
 * Efficient-GAN-Based Anomaly Detection
