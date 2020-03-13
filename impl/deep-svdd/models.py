@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 
-class SVDD(tf.keras.Model):
+class DeepSVDD(tf.keras.Model):
     def __init__(self, output_dim,
                  nb_filter=16,
                  normalization='batch',
