@@ -1,0 +1,23 @@
+logdir: ../../../logs/deep-svdd/mnist/debug
+test_epoch: 100
+
+train_data_params:
+  labels:
+    - 0
+  target_size:
+    - 32
+    - 32
+
+model_params:
+    output_dim: 2
+    nb_filter: 16
+    normalization: batch
+    downsampling: stride
+
+solver_params:
+  lr: 0.001
+
+fit_params:
+  batch_size: 128
+  nb_epoch: 100
+  save_steps: 10
