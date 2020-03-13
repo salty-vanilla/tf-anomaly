@@ -16,6 +16,7 @@ model_params:
 
 solver_params:
   lr: 0.001
+  objective: soft-boundary
 
 fit_params:
   batch_size: 128
