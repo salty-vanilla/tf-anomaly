@@ -1,4 +1,4 @@
-# Complementary GAN
+# Deep SVDD
 Deep One-Class Classification [[paper]](http://data.bit.uni-bonn.de/publications/ICML2018.pdf)  
 
 ## Environments
