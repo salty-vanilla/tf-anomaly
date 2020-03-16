@@ -1,5 +1,5 @@
 logdir: ../../../logs/deep-svdd/mnist/debug
-test_epoch: 100
+test_epoch: 30
 
 train_data_params:
   labels:
@@ -9,16 +9,16 @@ train_data_params:
     - 32
 
 model_params:
-    output_dim: 2
-    nb_filter: 16
-    normalization: batch
+    output_dim: 32
+    nb_filter: 8
+    normalization: 
     downsampling: stride
 
 solver_params:
   lr: 0.001
-  objective: soft-boundary
+  objective: one-class
 
 fit_params:
   batch_size: 128
-  nb_epoch: 100
+  nb_epoch: 30
   save_steps: 10
