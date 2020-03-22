@@ -29,7 +29,7 @@ class AutoEncoder(AE):
         self.dense_down1 = DenseBlock(64,
                                       activation_='lrelu',
                                       normalization=normalization)
-        self.dense_down2 = tf.layers.Dense(latent_dim)
+        self.dense_down2 = DenseBlock(latent_dim)
         self.dense_up1 = DenseBlock(64,
                                     activation_='lrelu',
                                     normalization=normalization)
@@ -41,8 +41,9 @@ class AutoEncoder(AE):
                               sampling=upsampling,
                               **self.conv_block_params)
                     for i in range(4)]
-        self.last_conv = tf.layers.Conv2D(1, (1, 1),
-                                          activation=last_activation)
+        self.last_conv = ConvBlock(1, 
+                                   kernel_size=(1, 1),
+                                   activation_=last_activation)
 
     def encode(self, inputs,
                training=None,

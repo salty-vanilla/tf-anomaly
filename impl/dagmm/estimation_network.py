@@ -10,7 +10,7 @@ class EstimationNetwork(tf.keras.Model):
                  normalization='batch'):
         super().__init__()
         self.denses = [DenseBlock(d,
-                                  activation_=None,
+                                  activation_='lrelu',
                                   normalization=normalization)
                        for d in dense_units[:len(dense_units)-1]]
         self.denses += [DenseBlock(dense_units[-1],
