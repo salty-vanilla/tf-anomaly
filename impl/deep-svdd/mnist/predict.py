@@ -33,7 +33,7 @@ def main():
     checkpoint = tf.train.Checkpoint(center=center, radius=radius)
 
     model.load_weights(os.path.join(config['logdir'], 'model', 'model_%d' % config['test_epoch']))
-    checkpoint.restore(os.path.join(config['logdir'], 'model', 'center_radius_30-3'))
+    checkpoint.restore(os.path.join(config['logdir'], 'model', 'center_radius_%d' % config['test_epoch']))
 
     outputs = model.predict(x)
     df_inlier = create_dataframe(x, y, 

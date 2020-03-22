@@ -95,7 +95,7 @@ class Solver(object):
             if epoch % save_steps == 0:
                 os.makedirs(os.path.join(self.logdir, 'model'), exist_ok=True)
                 self.model.save_weights(os.path.join(self.logdir, 'model', 'model_%d' % epoch))
-                self.checkpoint.save(os.path.join(self.logdir, 'model', 'center_radius_%d' % epoch))
+                self.checkpoint.write(os.path.join(self.logdir, 'model', 'center_radius_%d' % epoch))
 
     def compute_center(self, image_sampler, 
                        steps_per_epoch):
