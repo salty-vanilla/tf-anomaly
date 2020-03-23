@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 sys.path.append(os.getcwd())
 sys.path.append('../../')
-tf.enable_eager_execution()
 from datasets.mnist import load_data
 from mnist.autoencoder import AutoEncoder
 from estimation_network import EstimationNetwork
@@ -33,10 +32,14 @@ def main():
     gmm = GMM(config['estimator_params']['dense_units'][-1],
               config['autoencoder_params']['latent_dim']+1)
 
-    autoencoder(tf.random_normal(shape=(1, 32, 32, 1)),
-                training=False)
-    estimation_network(tf.random_normal(shape=(1, config['autoencoder_params']['latent_dim']+1)),
-                       training=False)
+    autoencoder.build(input_shape=(1, 32, 32, 1))
+    estimation_network.build(input_shape=(1, config['autoencoder_params']['latent_dim']+1))
+    gmm([tf.random.normal((1, config['autoencoder_params']['latent_dim']+1)),
+         tf.random.normal((1, config['estimator_params']['dense_units'][-1]))])
+        
+    # tf 2.1.0 doesn't accept 
+    # gmm.build(input_shape=[(1, config['autoencoder_params']['latent_dim']+1),
+    #                        (1, config['estimator_params']['dense_units'][-1])])
 
     dagmm = DAGMM(autoencoder,
                   estimation_network,

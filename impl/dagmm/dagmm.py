@@ -1,5 +1,4 @@
 import tensorflow as tf
-tf.enable_eager_execution()
 
 
 class DAGMM(tf.keras.Model):
@@ -16,23 +15,19 @@ class DAGMM(tf.keras.Model):
              mask=None,
              with_diff=False):
         z = self.autoencoder.encode(inputs,
-                                    training,
-                                    mask)
+                                    training=training)
         y = self.autoencoder.decode(z,
-                                    training,
-                                    mask)
+                                    training=training)
 
         diff = tf.reduce_mean(tf.square(inputs - y),
                               axis=[1, 2, 3])
         z_diff = tf.concat([z, diff[:, None]], axis=-1)
 
         gamma = self.estimation_network(z_diff,
-                                        training,
-                                        mask)
+                                        training=training)
 
         energy = self.gmm([z_diff, gamma],
-                          training,
-                          mask)
+                          training=training)
 
         if with_diff:
             return energy, diff

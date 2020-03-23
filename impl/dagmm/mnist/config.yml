@@ -1,5 +1,5 @@
 logdir: ../../../logs/dagmm/mnist/debug
-test_epoch: 100
+test_epoch: 300
 
 train_data_params:
   labels:
@@ -23,9 +23,10 @@ estimator_params:
   normalization: batch
 
 solver_params:
-  lr: 0.001
+  lr: 0.0001
+  lambda_energy: 0.1
 
 fit_params:
-  batch_size: 512
-  nb_epoch: 100
+  batch_size: 1024
+  nb_epoch: 300
   save_steps: 100

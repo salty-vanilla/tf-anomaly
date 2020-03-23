@@ -2,7 +2,6 @@ import tensorflow as tf
 import os
 import sys
 import time
-tf.enable_eager_execution()
 sys.path.append('../../')
 from datasets.image_sampler import ImageSampler
 
@@ -14,7 +13,7 @@ class Solver(object):
                  lr: float =1e-4,
                  logdir: str = None):
         self.dagmm = dagmm
-        self.optimizer = tf.train.AdamOptimizer(lr)
+        self.optimizer = tf.keras.optimizers.Adam(lr)
         self.lambda_energy = lambda_energy
         self.lambda_diag = lambda_diag
         self.logdir = logdir
@@ -57,7 +56,9 @@ class Solver(object):
                     energy = tf.reduce_mean(energy)
                     diff = tf.reduce_mean(diff)
 
-                    loss = diff + self.lambda_energy*energy + self.lambda_diag*diag_loss
+                    loss = diff \
+                           + self.lambda_energy*energy \
+                           + self.lambda_diag*diag_loss
                 grads = tape.gradient(loss, self.dagmm.trainable_variables)
                 self.optimizer.apply_gradients(zip(grads, self.dagmm.trainable_variables))
 

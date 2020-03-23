@@ -1,5 +1,4 @@
 from tensorflow.python.keras.preprocessing.image import Iterator
-from tensorflow.python.keras.utils import to_categorical
 import os
 import numpy as np
 

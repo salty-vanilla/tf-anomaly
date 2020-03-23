@@ -1,0 +1,49 @@
+logdir: ../../../logs/cgan/mnist/debug
+test_epoch: 30
+
+target_network: ../../../logs/cgan/mnist/debug/model/target/discriminator_30
+
+train_data_params:
+  labels:
+    - 0
+  with_label: False
+
+generator_params:
+  latent_dim: 128
+  nb_filter: 64
+  last_activation: tanh
+  normalization: batch
+  upsampling: deconv
+
+discriminator_params:
+  nb_filter: 64
+  normalization: batch
+  downsampling: stride
+
+target_params:
+  nb_filter: 64
+  normalization: batch
+  downsampling: stride
+
+ocgan_solver_params:
+  lr_g: 0.001
+  lr_d: 0.001
+  quantile: 5
+  metrics: JSD
+  d_entropy_weight: 1.0
+  feature_matching: discriminator
+  threshold: 0.2
+
+ocgan_fit_params:
+  nb_epoch: 30
+  visualize_steps: 10
+  save_steps: 10
+
+gan_solver_params:
+  lr_g: 0.001
+  lr_d: 0.00001
+
+gan_fit_params:
+  nb_epoch: 100
+  visualize_steps: 10
+  save_steps: 30

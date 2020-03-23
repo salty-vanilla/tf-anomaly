@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 sys.path.append(os.getcwd())
 sys.path.append('../../')
-tf.enable_eager_execution()
 from mnist.discriminator import Discriminator
 from datasets.mnist import load_data
 
@@ -26,7 +25,7 @@ def main():
 
     discriminator = Discriminator(**config['discriminator_params'])
     _ = tf.nn.sigmoid(discriminator(tf.constant(x[0][None, :], dtype=tf.float32), training=False))
-    discriminator.load_weights(os.path.join(config['logdir'], 'model', 'discriminator_%d.h5' % config['test_epoch']))
+    discriminator.load_weights(os.path.join(config['logdir'], 'model/ocgan', 'discriminator_%d.h5' % config['test_epoch']))
     outputs = tf.nn.sigmoid(discriminator(tf.constant(x, dtype=tf.float32), training=False))
 
     outputs = np.squeeze(np.asarray(outputs))

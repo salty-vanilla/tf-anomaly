@@ -6,7 +6,7 @@ from models import Discriminator as D
 from ops.blocks import ConvBlock, DenseBlock
 
 
-class Discriminator(D):
+class TargetNetwork(D):
     def __init__(self, nb_filter=16,
                  normalization='batch',
                  downsampling='stride',
