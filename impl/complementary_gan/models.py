@@ -6,7 +6,9 @@ class Generator(tf.keras.Model):
                  nb_filter=32,
                  last_activation='tanh',
                  normalization='batch',
-                 upsampling='deconv'):
+                 upsampling='deconv',
+                 *args,
+                 **kwargs):
         super().__init__()
         self.latent_dim = latent_dim
         self.nb_filter = nb_filter
@@ -24,19 +26,13 @@ class Generator(tf.keras.Model):
                                        'activation_': self.last_activation,
                                        'normalization': None}
 
-    @property
-    def vars(self):
-        return [var for var in tf.trainable_variables() if self.name in var.name]
-
-    @property
-    def update_ops(self):
-        return [ops for ops in tf.get_collection(tf.GraphKeys.UPDATE_OPS) if self.name in ops.name]
-
 
 class Discriminator(tf.keras.Model):
     def __init__(self, nb_filter=32,
                  normalization='batch',
-                 downsampling='stride'):
+                 downsampling='stride',
+                 *args,
+                 **kwargs):
         super().__init__()
         self.nb_filter = nb_filter
         self.normalization = normalization
@@ -45,11 +41,3 @@ class Discriminator(tf.keras.Model):
         self.conv_block_params = {'kernel_initializer': 'he_normal',
                                   'activation_': 'lrelu',
                                   'normalization': self.normalization}
-
-    @property
-    def vars(self):
-        return [var for var in tf.trainable_variables() if self.name in var.name]
-
-    @property
-    def update_ops(self):
-        return [ops for ops in tf.get_collection(tf.GraphKeys.UPDATE_OPS) if self.name in ops.name]
