@@ -34,6 +34,12 @@ def main():
 
     autoencoder.build(input_shape=(1, 32, 32, 1))
     estimation_network.build(input_shape=(1, config['autoencoder_params']['latent_dim']+1))
+    gmm([tf.random.normal((1, config['autoencoder_params']['latent_dim']+1)),
+         tf.random.normal((1, config['estimator_params']['dense_units'][-1]))])
+        
+    # tf 2.1.0 doesn't accept 
+    # gmm.build(input_shape=[(1, config['autoencoder_params']['latent_dim']+1),
+    #                        (1, config['estimator_params']['dense_units'][-1])])
 
     dagmm = DAGMM(autoencoder,
                   estimation_network,

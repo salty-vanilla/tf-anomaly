@@ -58,11 +58,11 @@ class GMMLayer(tf.keras.layers.Layer):
         gamma_sum = tf.reduce_sum(gamma, axis=0)
         phi = tf.reduce_mean(gamma, axis=0)
         mu = tf.einsum('ik,il->kl', gamma, z) / gamma_sum[:, None]
-        z_centered = tf.sqrt(gamma[:, :, None]) * (z[:, None, :] - mu[None, :, :])
+        z_centered = tf.sqrt(gamma[:, :, None]+self.eps) * (z[:, None, :] - mu[None, :, :])
         sigma = tf.einsum('ikl,ikm->klm',
                           z_centered,
                           z_centered)
-        sigma /= gamma_sum[:, None, None]
+        sigma /= (gamma_sum[:, None, None] + self.eps)
         # Calculate a cholesky decomposition of covariance in advance
         n_features = z.shape[1]
         min_vals = tf.linalg.diag(tf.ones(n_features, dtype=tf.float32)) * self.eps
