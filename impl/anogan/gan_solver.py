@@ -1,61 +1,47 @@
+import numpy as np
 import tensorflow as tf
 import os
 import sys
 import time
 from PIL import Image
-import numpy as np
-tf.enable_eager_execution()
 sys.path.append('../../')
 from datasets.image_sampler import ImageSampler
-from ops.losses import discriminator_loss, generator_loss, gradient_penalty, discriminator_norm
+from ops.losses import discriminator_loss, generator_loss, gradient_penalty
 
 
 class GANSolver(object):
     def __init__(self, generator,
                  discriminator,
-                 gp_lambda: float=10.,
-                 d_norm_eps: float=1e-3,
-                 lr_g: float=1e-4,
-                 lr_d: float=1e-4,
-                 logdir: str = None):
+                 lr_g: float =1e-3,
+                 lr_d: float =1e-3,
+                 logdir: str =None):
         self.generator = generator
         self.discriminator = discriminator
-        self.gp_lambda = gp_lambda
-        self.d_norm_eps = d_norm_eps
-        self.opt_g = tf.train.AdamOptimizer(lr_g, beta1=0.5, beta2=0.9)
-        self.opt_d = tf.train.AdamOptimizer(lr_d, beta1=0.5, beta2=0.9)
+        self.opt_g = tf.keras.optimizers.Adam(lr_g)
+        self.opt_d = tf.keras.optimizers.Adam(lr_d)
         self.latent_dim = self.generator.latent_dim
         self.logdir = logdir
 
     def _update_discriminator(self, x, z):
-        gz = self.generator(z, training=True)
         with tf.GradientTape() as tape:
-            gp = gradient_penalty(self.discriminator,
-                                  real=x,
-                                  fake=gz)
-            gp *= self.gp_lambda
-        grads_gp = tape.gradient(gp, self.discriminator.variables)
-
-        with tf.GradientTape() as tape:
+            gz = self.generator(z, training=True)
             d_real = self.discriminator(x, training=True)
             d_fake = self.discriminator(gz, training=True)
-            loss_d = discriminator_loss(d_real, d_fake, 'WD')
-            d_norm = discriminator_norm(d_real)
-            loss = loss_d + self.d_norm_eps*d_norm
 
-        grads = tape.gradient(loss, self.discriminator.variables)
-        grads = [g + ggp for g, ggp in zip(grads, grads_gp)
-                 if ggp is not None]
-        self.opt_d.apply_gradients(zip(grads, self.discriminator.variables))
-        return loss_d, d_norm
+            loss_d = discriminator_loss(d_real, d_fake, 'JSD')
+        grads = tape.gradient(loss_d, self.discriminator.trainable_variables)
+        self.opt_d.apply_gradients(zip(grads, self.discriminator.trainable_variables))
+
+        return loss_d
 
     def _update_generator(self, z):
         with tf.GradientTape() as tape:
             gz = self.generator(z, training=True)
             d_fake = self.discriminator(gz, training=True)
-            loss_g = generator_loss(d_fake, 'WD')
-        grads = tape.gradient(loss_g, self.generator.variables)
-        self.opt_g.apply_gradients(zip(grads, self.generator.variables))
+            loss_g = generator_loss(d_fake, 'JSD')
+
+        grads = tape.gradient(loss_g, self.generator.trainable_variables)
+        self.opt_g.apply_gradients(zip(grads, self.generator.trainable_variables))
         return loss_g
 
     def fit(self, x,
@@ -91,14 +77,13 @@ class GANSolver(object):
             start = time.time()
             for iter_ in range(1, steps_per_epoch + 1):
                 x = image_sampler()
-                if x.shape[0] != batch_size:
+                if len(x) != batch_size:
                     continue
                 z = noise_sampler(batch_size, self.latent_dim)
-
                 # Discriminator
                 x = tf.constant(x, dtype=tf.float32)
                 z = tf.constant(z, dtype=tf.float32)
-                loss_d, d_norm = self._update_discriminator(x, z)
+                loss_d = self._update_discriminator(x, z)
 
                 # Generator
                 z = noise_sampler(batch_size, self.latent_dim)
@@ -114,8 +99,8 @@ class GANSolver(object):
 
             if epoch % save_steps == 0:
                 os.makedirs(os.path.join(self.logdir, 'model'), exist_ok=True)
-                self.generator.save_weights(os.path.join(self.logdir, 'model', 'generator_%d.h5' % epoch))
-                self.discriminator.save_weights(os.path.join(self.logdir, 'model', 'discriminator_%d.h5' % epoch))
+                self.generator.save_weights(os.path.join(self.logdir, 'model/target', 'generator_%d' % epoch))
+                self.discriminator.save_weights(os.path.join(self.logdir, 'model/target', 'discriminator_%d' % epoch))
 
     def _visualize(self, z, epoch, data_to_image):
         dst_path = os.path.join(self.logdir, 'image', 'epoch_%d.png' % epoch)
@@ -123,6 +108,8 @@ class GANSolver(object):
         outputs = self.generator(z, training=True)
         outputs = np.array(outputs)
         outputs = data_to_image(outputs)
+        if outputs.ndim == 3:
+            outputs = np.expand_dims(outputs, -1)
         n, h, w, c = outputs.shape
         n_sq = int(np.sqrt(n))
         outputs = outputs[:n_sq ** 2]
