@@ -9,8 +9,6 @@ Major anomaly detection methods using neural networks are implemented in this re
 * [Complementary GAN](https://github.com/salty-vanilla/tf-anomaly/tree/master/impl/complementary_gan)
 * [DAGMM](https://github.com/salty-vanilla/tf-anomaly/tree/master/impl/dagmm)
 * [DeepSVDD](https://github.com/salty-vanilla/tf-anomaly/tree/master/impl/deep-svdd)
-
-## WIP
 * [AnoGAN](https://github.com/salty-vanilla/tf-anomaly/tree/master/impl/anogan)
 
 ## To Implement
