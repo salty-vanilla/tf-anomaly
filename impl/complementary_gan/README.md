@@ -5,7 +5,7 @@ But it has convolutional layers.
 
 ## Environments
 * python 3.6
-* tensorflow 1.11
+* tensorflow 2.1.0
 
 ## Experiments
 * Inlier: '0' in MNIST
