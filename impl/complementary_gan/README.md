@@ -1,7 +1,6 @@
 # Complementary GAN
 One-Class Adversarial Nets for Fraud Detection [[paper]](https://arxiv.org/abs/1803.01798)  
-I implemented only complementary GAN.  
-But it has convolutional layers.  
+I implemented Complementary GAN with conv layers.  
 
 ## Environments
 * python 3.6
