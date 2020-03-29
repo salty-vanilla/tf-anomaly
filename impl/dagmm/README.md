@@ -1,7 +1,7 @@
 # DAGMM
 Deep Autoencoding Gaussian Mixture Model for Unsupervised Anomaly Detection [[paper]](https://openreview.net/forum?id=BJJLHbb0-)  
-In the paper, full-connected autoencoder is used.
-In this repository, autoencoders with convolutional layers and full-connected.
+In this paper, full-connected autoencoder is used.
+But in this repository, autoencoder with convolutional layers and full-connected is used.
 
 ## Environments
 * python 3.6
