@@ -13,3 +13,7 @@ GAN's metric is JSD.
 ### Discrimination results
 | <img src="assets/score_histogram.png"> | <img src="assets/roc.png"> |
 |-|-|
+
+### Generated samples
+| <img src="assets/inlier.gif"> | <img src="assets/outlier.gif"> |
+|-|-|
